@@ -138,3 +138,9 @@ export function lookupBarcode(barcode: string): Promise<LookupResult> {
 export function lookupMovie(q: string): Promise<LookupResult[]> {
   return apiFetch(`/lookup/movie?q=${encodeURIComponent(q)}`)
 }
+
+export function decodeBarcode(file: File): Promise<{ barcode: string; type: string }> {
+  const form = new FormData()
+  form.append('file', file)
+  return apiUpload('/lookup/decode-barcode', form)
+}

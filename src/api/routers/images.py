@@ -1,13 +1,18 @@
-"""Item image upload, Immich attach, and serving."""
+"""Item image upload, Immich attach, cover download, and serving."""
 
 import hashlib
+import logging
 import uuid
 from pathlib import Path
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 
 from config.settings import settings
+
+log = logging.getLogger(__name__)
 from src.api.deps import CurrentUser, get_conn, get_current_user
 
 router = APIRouter()
@@ -18,6 +23,41 @@ THUMB_DIR = IMAGES_DIR / "thumbs"
 
 def _ensure_dirs():
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def download_cover_image(item_id: int, url: str, conn) -> bool:
+    """Download an image from a URL and attach it to an item. Returns True on success."""
+    _ensure_dirs()
+    try:
+        with httpx.Client(timeout=15, follow_redirects=True) as client:
+            resp = client.get(url)
+            if resp.status_code != 200:
+                return False
+            content = resp.content
+            if len(content) < 1000:  # too small, probably an error page
+                return False
+    except Exception:
+        log.exception("Failed to download cover from %s", url)
+        return False
+
+    content_type = resp.headers.get("content-type", "")
+    ext = ".jpg"
+    if "png" in content_type:
+        ext = ".png"
+    elif "webp" in content_type:
+        ext = ".webp"
+
+    filename = f"{uuid.uuid4().hex}{ext}"
+    (IMAGES_DIR / filename).write_bytes(content)
+
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO item_image (item_id, filename, is_primary, caption)
+        VALUES (%s, %s, true, 'Cover')
+    """, (item_id, filename))
+    conn.commit()
+    log.info("Downloaded cover for item %d: %s", item_id, filename)
+    return True
     THUMB_DIR.mkdir(parents=True, exist_ok=True)
 
 

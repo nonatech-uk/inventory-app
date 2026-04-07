@@ -153,9 +153,15 @@ export default function ItemDetail() {
                 <div className="col-span-2 border-t border-border pt-3 mt-1 text-xs font-medium text-text-secondary uppercase">Media Info</div>
                 <div><span className="text-text-secondary">Type:</span> {item.media_type}</div>
                 <div><span className="text-text-secondary">Title:</span> {item.media_title || '—'}</div>
+                {item.media_subtitle && <div><span className="text-text-secondary">Subtitle:</span> {item.media_subtitle}</div>}
                 <div><span className="text-text-secondary">Creator:</span> {item.media_creator || '—'}</div>
+                {item.media_publisher && <div><span className="text-text-secondary">Publisher:</span> {item.media_publisher}</div>}
+                {item.media_publish_date && <div><span className="text-text-secondary">Published:</span> {item.media_publish_date}</div>}
                 <div><span className="text-text-secondary">Year:</span> {item.media_year || '—'}</div>
                 <div><span className="text-text-secondary">ISBN:</span> {item.media_isbn || '—'}</div>
+                {item.media_pages && <div><span className="text-text-secondary">Pages:</span> {item.media_pages}</div>}
+                {item.media_format && <div><span className="text-text-secondary">Format:</span> {item.media_format}</div>}
+                {item.media_language && <div><span className="text-text-secondary">Language:</span> {item.media_language}</div>}
                 <div><span className="text-text-secondary">Genre:</span> {item.media_genre || '—'}</div>
               </>
             )}
@@ -225,13 +231,13 @@ export default function ItemDetail() {
           </label>
         </div>
         {item.images.length > 0 ? (
-          <div className="grid grid-cols-4 gap-2">
+          <div className="flex flex-wrap gap-2">
             {item.images.map((img) => (
               <div key={img.id} className="relative group">
                 <img
                   src={img.immich_asset_id ? `/api/v1/images/${img.filename}` : `/api/v1/images/${img.filename}/thumb`}
                   alt={img.caption || ''}
-                  className="w-full h-24 object-cover rounded"
+                  className="h-40 w-auto object-contain rounded"
                 />
                 <button
                   onClick={() => handleImageDelete(img.id)}

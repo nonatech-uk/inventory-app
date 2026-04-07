@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.deps import CurrentUser, get_conn, get_current_user
 from src.api.models import ItemCreate, ItemDetail, ItemList, ItemSummary, ItemUpdate
+from src.api.routers.images import download_cover_image
 
 router = APIRouter()
 
@@ -19,7 +20,10 @@ _DETAIL_COLS = """
     i.category, i.quantity, i.purchase_date, i.purchase_price,
     i.current_value, i.currency, i.brand, i.model, i.serial_number,
     i.barcode, i.notes, i.media_type, i.media_title, i.media_creator,
-    i.media_year, i.media_isbn, i.media_cover_url, i.media_genre,
+    i.media_year, i.media_isbn, i.media_cover_url,
+    i.media_subtitle, i.media_publisher, i.media_pages,
+    i.media_format, i.media_language, i.media_publish_date,
+    i.media_genre,
     i.is_insured, i.status, i.created_at, i.updated_at
 """
 
@@ -118,8 +122,11 @@ def _row_to_detail(row, cur) -> ItemDetail:
         serial_number=row[13], barcode=row[14], notes=row[15],
         media_type=row[16], media_title=row[17], media_creator=row[18],
         media_year=row[19], media_isbn=row[20], media_cover_url=row[21],
-        media_genre=row[22], is_insured=row[23], status=row[24],
-        created_at=str(row[25]), updated_at=str(row[26]),
+        media_subtitle=row[22], media_publisher=row[23], media_pages=row[24],
+        media_format=row[25], media_language=row[26],
+        media_publish_date=str(row[27]) if row[27] else None,
+        media_genre=row[28], is_insured=row[29], status=row[30],
+        created_at=str(row[31]), updated_at=str(row[32]),
         images=images,
         documents=documents,
         amazon_links=amazon_links,
@@ -221,11 +228,13 @@ def create_item(
             purchase_date, purchase_price, current_value, currency,
             brand, model, serial_number, barcode, notes,
             media_type, media_title, media_creator, media_year,
-            media_isbn, media_cover_url, media_genre,
-            is_insured, status
+            media_isbn, media_cover_url,
+            media_subtitle, media_publisher, media_pages,
+            media_format, media_language, media_publish_date,
+            media_genre, is_insured, status
         ) VALUES (
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-            %s, %s, %s, %s, %s, %s, %s, %s, %s
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
         ) RETURNING id
     """, (
         body.name, body.description, body.location_id, body.category,
@@ -234,10 +243,16 @@ def create_item(
         body.serial_number, body.barcode, body.notes,
         body.media_type, body.media_title, body.media_creator,
         body.media_year, body.media_isbn, body.media_cover_url,
+        body.media_subtitle, body.media_publisher, body.media_pages,
+        body.media_format, body.media_language, body.media_publish_date,
         body.media_genre, body.is_insured, body.status,
     ))
     conn.commit()
     item_id = cur.fetchone()[0]
+
+    # Download cover image if URL provided
+    if body.media_cover_url:
+        download_cover_image(item_id, body.media_cover_url, conn)
 
     cur.execute(f"""
         SELECT {_DETAIL_COLS}
@@ -263,8 +278,10 @@ def update_item(
         "purchase_date", "purchase_price", "current_value", "currency",
         "brand", "model", "serial_number", "barcode", "notes",
         "media_type", "media_title", "media_creator", "media_year",
-        "media_isbn", "media_cover_url", "media_genre",
-        "is_insured", "status",
+        "media_isbn", "media_cover_url",
+        "media_subtitle", "media_publisher", "media_pages",
+        "media_format", "media_language", "media_publish_date",
+        "media_genre", "is_insured", "status",
     ):
         val = getattr(body, field_name)
         if val is not None:

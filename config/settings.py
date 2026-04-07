@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     # Storage
     image_storage_path: str = "/app/data/images"
 
+    # Pipeline ingest
+    pipeline_secret: str = ""
+
     # Auth
     auth_enabled: bool = True
     dev_user_email: str = "stu@mees.st"

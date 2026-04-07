@@ -88,6 +88,12 @@ class ItemDetail(BaseModel):
     media_year: int | None
     media_isbn: str | None
     media_cover_url: str | None
+    media_subtitle: str | None
+    media_publisher: str | None
+    media_pages: int | None
+    media_format: str | None
+    media_language: str | None
+    media_publish_date: str | None
     media_genre: str | None
     is_insured: bool
     status: str
@@ -119,6 +125,12 @@ class ItemCreate(BaseModel):
     media_year: int | None = None
     media_isbn: str | None = None
     media_cover_url: str | None = None
+    media_subtitle: str | None = None
+    media_publisher: str | None = None
+    media_pages: int | None = None
+    media_format: str | None = None
+    media_language: str | None = None
+    media_publish_date: str | None = None
     media_genre: str | None = None
     is_insured: bool = False
     status: str = "owned"
@@ -145,6 +157,12 @@ class ItemUpdate(BaseModel):
     media_year: int | None = None
     media_isbn: str | None = None
     media_cover_url: str | None = None
+    media_subtitle: str | None = None
+    media_publisher: str | None = None
+    media_pages: int | None = None
+    media_format: str | None = None
+    media_language: str | None = None
+    media_publish_date: str | None = None
     media_genre: str | None = None
     is_insured: bool | None = None
     status: str | None = None

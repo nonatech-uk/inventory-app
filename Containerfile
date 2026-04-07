@@ -13,7 +13,7 @@ FROM python:3.12-slim
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl libjpeg62-turbo zlib1g libwebp7 \
+    curl libjpeg62-turbo zlib1g libwebp7 libzbar0 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

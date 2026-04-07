@@ -99,6 +99,12 @@ export interface ItemDetail {
   media_year: number | null
   media_isbn: string | null
   media_cover_url: string | null
+  media_subtitle: string | null
+  media_publisher: string | null
+  media_pages: number | null
+  media_format: string | null
+  media_language: string | null
+  media_publish_date: string | null
   media_genre: string | null
   is_insured: boolean
   status: string
@@ -130,6 +136,12 @@ export interface ItemCreate {
   media_year?: number | null
   media_isbn?: string | null
   media_cover_url?: string | null
+  media_subtitle?: string | null
+  media_publisher?: string | null
+  media_pages?: number | null
+  media_format?: string | null
+  media_language?: string | null
+  media_publish_date?: string | null
   media_genre?: string | null
   is_insured?: boolean
   status?: string
@@ -187,6 +199,8 @@ export interface AmazonOrder {
 export interface LookupResult {
   source: string
   title?: string
+  subtitle?: string
+  description?: string | null
   name?: string
   creator?: string
   brand?: string
@@ -196,6 +210,12 @@ export interface LookupResult {
   cover_url?: string | null
   image_url?: string | null
   category?: string
+  publisher?: string | null
+  pages?: number | null
+  physical_format?: string | null
+  language?: string | null
+  publish_date?: string | null
+  subjects?: string[] | null
 }
 
 export interface OverviewStats {
