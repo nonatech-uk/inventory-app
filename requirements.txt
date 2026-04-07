@@ -1,0 +1,7 @@
+psycopg2-binary
+pydantic-settings
+fastapi
+python-multipart
+uvicorn[standard]
+httpx
+Pillow
