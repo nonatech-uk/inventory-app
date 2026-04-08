@@ -17,7 +17,7 @@ _SUMMARY_COLS = """
     i.id, i.name, i.description, i.category, i.quantity,
     i.purchase_price, i.current_value, i.currency, i.brand, i.model,
     i.status, i.media_type, i.media_title, i.media_creator,
-    i.location_id, l.name AS location_name, i.created_at
+    i.location_id, l.name AS location_name, i.created_at, i.media_isbn
 """
 
 _DETAIL_COLS = """
@@ -72,7 +72,7 @@ def _row_to_summary(row, cur) -> ItemSummary:
         location_id=row[14], location_name=row[15],
         location_path=_location_path(cur, row[14]),
         primary_image=_primary_image(cur, row[0]),
-        created_at=str(row[16]),
+        created_at=str(row[16]), media_isbn=row[17],
     )
 
 

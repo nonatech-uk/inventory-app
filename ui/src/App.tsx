@@ -8,6 +8,8 @@ import ItemDetail from './pages/ItemDetail.tsx'
 import AddItem from './pages/AddItem.tsx'
 import Media from './pages/Media.tsx'
 import Search from './pages/Search.tsx'
+import Amazon from './pages/Amazon.tsx'
+import Ebay from './pages/Ebay.tsx'
 
 export default function App() {
   return (
@@ -23,6 +25,8 @@ export default function App() {
           <Route path="/add" element={<AddItem />} />
           <Route path="/media" element={<Media />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/amazon" element={<Amazon />} />
+          <Route path="/ebay" element={<Ebay />} />
           <Route path="*" element={<div className="text-text-secondary">Page not found</div>} />
         </Routes>
       </Shell>

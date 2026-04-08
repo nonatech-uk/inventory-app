@@ -9,6 +9,8 @@ const NAV_ITEMS = [
   { to: '/add', label: 'Add Item', icon: '+' },
   { to: '/media', label: 'Media', icon: '♫' },
   { to: '/search', label: 'Search', icon: '⌕' },
+  { to: '/amazon', label: 'Amazon', icon: '⏣' },
+  { to: '/ebay', label: 'eBay', icon: '⊞' },
 ]
 
 export default function Sidebar() {

@@ -197,6 +197,33 @@ export interface AmazonOrder {
   category: string | null
 }
 
+export interface AmazonOrderItem {
+  id: number
+  order_id: string
+  order_date: string | null
+  asin: string | null
+  description: string
+  quantity: number
+  unit_price: number | null
+  currency: string
+  category: string | null
+  order_url: string | null
+  item_url: string | null
+  is_subscription: boolean
+  created_at: string
+}
+
+export interface AmazonUploadResult {
+  inserted: number
+  skipped: number
+  total: number
+}
+
+export interface AmazonOrderList {
+  items: AmazonOrderItem[]
+  total: number
+}
+
 export interface EbayOrder {
   ebay_order_id: string
   direction: string
@@ -210,6 +237,11 @@ export interface EbayOrder {
   status: string | null
   image_url: string | null
   ebay_url: string | null
+}
+
+export interface EbayOrderList {
+  items: EbayOrder[]
+  total: number
 }
 
 export interface EbayLinkItem {

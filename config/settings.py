@@ -12,11 +12,6 @@ class Settings(BaseSettings):
     db_password: str = ""
     db_sslmode: str = "prefer"
 
-    # Cross-DB (finance — for Amazon order lookups)
-    finance_db_name: str = "finance"
-    finance_db_user: str = "finance"
-    finance_db_password: str = ""
-
     # External services
     immich_url: str = "http://localhost:2283"
     immich_public_url: str = "https://pix.mees.st"
@@ -72,12 +67,5 @@ class Settings(BaseSettings):
             f"host={self.db_host} port={self.db_port} dbname={self.db_name} "
             f"user={self.db_user} password={self.db_password} sslmode={self.db_sslmode}"
         )
-
-    def cross_dsn(self, db_name: str, db_user: str, db_password: str) -> str:
-        return (
-            f"host={self.db_host} port={self.db_port} dbname={db_name} "
-            f"user={db_user} password={db_password} sslmode={self.db_sslmode}"
-        )
-
 
 settings = Settings()

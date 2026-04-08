@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 
 from config.settings import settings
 from src.api.deps import CurrentUser, get_conn, get_current_user
-from src.api.models import EbayLinkCreate, EbayLinkItem, EbayOrder
+from src.api.models import EbayLinkCreate, EbayLinkItem, EbayOrder, EbayOrderList
 
 log = logging.getLogger(__name__)
 router = APIRouter()
@@ -20,6 +20,56 @@ EBAY_SCOPES = "https://api.ebay.com/oauth/api_scope"
 
 
 # --- Search & Link (authenticated, like Amazon) ---
+
+
+@router.get("/ebay/orders", response_model=EbayOrderList)
+def list_ebay_orders(
+    q: str | None = Query(None),
+    direction: str | None = Query(None),
+    limit: int = Query(50, le=200),
+    offset: int = Query(0, ge=0),
+    conn=Depends(get_conn),
+    _user: CurrentUser = Depends(get_current_user),
+):
+    """Browse eBay orders with optional search and direction filter."""
+    cur = conn.cursor()
+
+    where_clauses = []
+    params: list = []
+    if q:
+        where_clauses.append("title ILIKE %s")
+        params.append(f"%{q}%")
+    if direction:
+        where_clauses.append("direction = %s")
+        params.append(direction)
+
+    where = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
+    cur.execute(f"SELECT count(*) FROM ebay_order {where}", params)
+    total = cur.fetchone()[0]
+
+    cur.execute(f"""
+        SELECT ebay_order_id, direction, ebay_item_id, title, quantity,
+               price, currency, counterparty, order_date, status,
+               image_url, ebay_url
+        FROM ebay_order
+        {where}
+        ORDER BY order_date DESC NULLS LAST
+        LIMIT %s OFFSET %s
+    """, params + [limit, offset])
+
+    items = [
+        EbayOrder(
+            ebay_order_id=r[0], direction=r[1], ebay_item_id=r[2],
+            title=r[3], quantity=r[4],
+            price=float(r[5]) if r[5] else None, currency=r[6],
+            counterparty=r[7],
+            order_date=str(r[8]) if r[8] else None, status=r[9],
+            image_url=r[10], ebay_url=r[11],
+        )
+        for r in cur.fetchall()
+    ]
+    return EbayOrderList(items=items, total=total)
 
 
 @router.get("/ebay/search", response_model=list[EbayOrder])

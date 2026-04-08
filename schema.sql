@@ -137,6 +137,29 @@ CREATE INDEX IF NOT EXISTS idx_item_amazon_item ON item_amazon_link(item_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_item_amazon_unique
     ON item_amazon_link (item_id, amazon_order_id, COALESCE(amazon_asin, ''));
 
+CREATE TABLE IF NOT EXISTS amazon_order_item (
+    id SERIAL PRIMARY KEY,
+    order_id TEXT NOT NULL,
+    order_date DATE,
+    asin TEXT,
+    description TEXT NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    unit_price NUMERIC(10,2),
+    currency TEXT NOT NULL DEFAULT 'GBP',
+    category TEXT,
+    order_url TEXT,
+    item_url TEXT,
+    is_subscription BOOLEAN NOT NULL DEFAULT false,
+    raw_data JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_amazon_order_item_unique
+    ON amazon_order_item (order_id, COALESCE(asin, ''), description);
+CREATE INDEX IF NOT EXISTS idx_amazon_order_item_date
+    ON amazon_order_item (order_date DESC);
+CREATE INDEX IF NOT EXISTS idx_amazon_order_item_search
+    ON amazon_order_item USING GIN(to_tsvector('english', description));
+
 CREATE TABLE IF NOT EXISTS ebay_order (
     id SERIAL PRIMARY KEY,
     ebay_order_id TEXT UNIQUE NOT NULL,

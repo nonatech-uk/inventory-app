@@ -2,8 +2,8 @@ import { apiFetch, apiUpload } from './client.ts'
 import type {
   ItemCategory, ItemCategoryCreate,
   ItemCreate, ItemDetail, ItemList, ItemUpdate,
-  AmazonLinkItem, AmazonOrder, DocumentItem,
-  EbayLinkItem, EbayOrder,
+  AmazonLinkItem, AmazonOrder, AmazonOrderList, AmazonUploadResult, DocumentItem,
+  EbayLinkItem, EbayOrder, EbayOrderList,
   LookupResult, ImageItem,
 } from './types.ts'
 
@@ -152,6 +152,21 @@ export function unlinkAmazon(linkId: number): Promise<void> {
   return apiFetch(`/amazon-links/${linkId}`, { method: 'DELETE' })
 }
 
+export function uploadAmazonCsv(file: File): Promise<AmazonUploadResult> {
+  const fd = new FormData()
+  fd.append('file', file)
+  return apiUpload('/amazon/upload', fd)
+}
+
+export function fetchAmazonOrders(params: { q?: string; limit?: number; offset?: number } = {}): Promise<AmazonOrderList> {
+  const qs = new URLSearchParams()
+  if (params.q) qs.set('q', params.q)
+  if (params.limit) qs.set('limit', String(params.limit))
+  if (params.offset) qs.set('offset', String(params.offset))
+  const query = qs.toString()
+  return apiFetch(`/amazon/orders${query ? '?' + query : ''}`)
+}
+
 // --- eBay ---
 
 export function searchEbay(params: { q?: string; direction?: string }): Promise<EbayOrder[]> {
@@ -173,6 +188,16 @@ export function linkEbay(
 
 export function unlinkEbay(linkId: number): Promise<void> {
   return apiFetch(`/ebay-links/${linkId}`, { method: 'DELETE' })
+}
+
+export function fetchEbayOrders(params: { q?: string; direction?: string; limit?: number; offset?: number } = {}): Promise<EbayOrderList> {
+  const qs = new URLSearchParams()
+  if (params.q) qs.set('q', params.q)
+  if (params.direction) qs.set('direction', params.direction)
+  if (params.limit) qs.set('limit', String(params.limit))
+  if (params.offset) qs.set('offset', String(params.offset))
+  const query = qs.toString()
+  return apiFetch(`/ebay/orders${query ? '?' + query : ''}`)
 }
 
 // --- Lookup ---

@@ -57,6 +57,7 @@ class ItemSummary(BaseModel):
     media_type: str | None
     media_title: str | None
     media_creator: str | None
+    media_isbn: str | None = None
     location_id: int | None
     location_name: str | None = None
     location_path: str | None = None
@@ -225,6 +226,33 @@ class AmazonLinkCreate(BaseModel):
     amazon_date: str | None = None
 
 
+class AmazonOrderItem(BaseModel):
+    id: int
+    order_id: str
+    order_date: str | None
+    asin: str | None
+    description: str
+    quantity: int
+    unit_price: float | None
+    currency: str
+    category: str | None
+    order_url: str | None
+    item_url: str | None
+    is_subscription: bool
+    created_at: str
+
+
+class AmazonUploadResult(BaseModel):
+    inserted: int
+    skipped: int
+    total: int
+
+
+class AmazonOrderList(BaseModel):
+    items: list[AmazonOrderItem]
+    total: int
+
+
 # --- eBay ---
 
 class EbayOrder(BaseModel):
@@ -252,6 +280,11 @@ class EbayLinkItem(BaseModel):
     ebay_date: str | None
     direction: str
     linked_at: str
+
+
+class EbayOrderList(BaseModel):
+    items: list[EbayOrder]
+    total: int
 
 
 class EbayLinkCreate(BaseModel):
