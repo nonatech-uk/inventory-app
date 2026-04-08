@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     ebay_site_id: str = "3"  # UK
     ebay_verification_token: str = ""
 
+    # Healthcheck UUIDs
+    hc_ebay_sync: str = ""
+    hc_immich_tag_sync: str = ""
+
     # Storage
     image_storage_path: str = "/app/data/images"
 

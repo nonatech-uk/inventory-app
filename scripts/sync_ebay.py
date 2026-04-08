@@ -24,7 +24,7 @@ import psycopg2
 
 from config.settings import settings
 
-HC_UUID = ""  # TODO: create healthcheck at hc.mees.st and paste UUID here
+HC_UUID = settings.hc_ebay_sync
 HC_BASE = "https://hc.mees.st/ping"
 
 EBAY_NS = "urn:ebay:apis:eBLBaseComponents"
