@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     immich_url: str = "http://localhost:2283"
     immich_public_url: str = "https://pix.mees.st"
     immich_api_key: str = ""
+    immich_tag_api_key: str = ""  # key with tag.create + tag.asset perms (falls back to immich_api_key)
     paperless_url: str = "http://localhost:8000"
     paperless_api_token: str = ""
     tmdb_api_key: str = ""

@@ -1,6 +1,7 @@
 """Item image upload, Immich attach, cover download, and serving."""
 
 import hashlib
+import io
 import logging
 import uuid
 from pathlib import Path
@@ -143,6 +144,11 @@ def attach_immich_image(
 
 @router.get("/images/{filename}")
 def serve_image(filename: str):
+    # Proxy Immich asset thumbnails
+    if filename.startswith("immich-"):
+        asset_id = filename.removeprefix("immich-")
+        return _proxy_immich_thumbnail(asset_id)
+
     file_path = IMAGES_DIR / filename
     if not file_path.is_file():
         raise HTTPException(404, "Image not found")
@@ -152,8 +158,39 @@ def serve_image(filename: str):
     )
 
 
+def _proxy_immich_thumbnail(asset_id: str):
+    """Fetch a thumbnail from Immich and return it.
+
+    TODO: Immich strips EXIF from thumbnails and doesn't apply rotation
+    for HEIC files. Needs investigation to map Immich orientation metadata
+    to the correct rotation for thumbnails.
+    """
+    from fastapi.responses import Response
+
+    try:
+        with httpx.Client(timeout=10) as client:
+            resp = client.get(
+                f"{settings.immich_url}/api/assets/{asset_id}/thumbnail",
+                headers={"x-api-key": settings.immich_api_key},
+                params={"size": "preview"},
+            )
+        if resp.status_code != 200:
+            raise HTTPException(404, "Immich asset not found")
+        return Response(
+            content=resp.content,
+            media_type=resp.headers.get("content-type", "image/jpeg"),
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
+    except httpx.HTTPError:
+        raise HTTPException(502, "Failed to fetch from Immich")
+
+
 @router.get("/images/{filename}/thumb")
 def serve_thumbnail(filename: str):
+    if filename.startswith("immich-"):
+        asset_id = filename.removeprefix("immich-")
+        return _proxy_immich_thumbnail(asset_id)
+
     _ensure_dirs()
     thumb_path = THUMB_DIR / filename
     if not thumb_path.is_file():
