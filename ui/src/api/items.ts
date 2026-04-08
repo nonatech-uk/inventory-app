@@ -51,6 +51,18 @@ export function deleteItem(id: number): Promise<void> {
   return apiFetch(`/items/${id}`, { method: 'DELETE' })
 }
 
+export function bulkUpdateItems(data: {
+  item_ids: number[]
+  location_id?: number
+  category?: string
+  status?: string
+}): Promise<{ updated: number }> {
+  return apiFetch('/items/bulk', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  })
+}
+
 // --- Images ---
 
 export function uploadImage(itemId: number, file: File, isPrimary = false): Promise<ImageItem> {
@@ -61,6 +73,20 @@ export function uploadImage(itemId: number, file: File, isPrimary = false): Prom
 
 export function deleteImage(imageId: number): Promise<void> {
   return apiFetch(`/images/${imageId}`, { method: 'DELETE' })
+}
+
+export function attachImmichImage(itemId: number, assetId: string): Promise<ImageItem> {
+  return apiFetch(`/items/${itemId}/images/immich?immich_asset_id=${encodeURIComponent(assetId)}`, {
+    method: 'POST',
+  })
+}
+
+export function searchImmich(query: string, limit = 24): Promise<{ id: string; thumbnail_url: string; original_filename: string }[]> {
+  return apiFetch(`/immich/search?q=${encodeURIComponent(query)}&limit=${limit}`)
+}
+
+export function searchImmichRecent(days = 7, limit = 24): Promise<{ id: string; thumbnail_url: string; original_filename: string }[]> {
+  return apiFetch(`/immich/search/recent?days=${days}&limit=${limit}`)
 }
 
 // --- Documents ---

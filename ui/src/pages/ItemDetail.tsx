@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useItem, useUpdateItem, useDeleteItem, useCategories } from '../hooks/useItems.ts'
 import { useLocations } from '../hooks/useLocations.ts'
 import { useLocationPath } from '../hooks/useLocations.ts'
-import { uploadImage, deleteImage, unlinkDocument, unlinkAmazon } from '../api/items.ts'
+import { uploadImage, deleteImage, attachImmichImage, unlinkDocument, unlinkAmazon } from '../api/items.ts'
+import ImmichBrowser from '../components/ImmichBrowser.tsx'
 import { useQueryClient } from '@tanstack/react-query'
 import LoadingSpinner from '../components/common/LoadingSpinner.tsx'
 import type { ItemUpdate } from '../api/types.ts'
@@ -24,6 +25,8 @@ export default function ItemDetail() {
   const deleteMutation = useDeleteItem()
   const [editing, setEditing] = useState(false)
   const [editForm, setEditForm] = useState<ItemUpdate>({})
+  const [showImmich, setShowImmich] = useState(false)
+  const [immichSelected, setImmichSelected] = useState<string[]>([])
 
   if (isLoading) return <LoadingSpinner />
   if (!item) return <div className="text-text-secondary">Item not found</div>
@@ -74,6 +77,15 @@ export default function ItemDetail() {
 
   const handleImageDelete = async (imageId: number) => {
     await deleteImage(imageId)
+    queryClient.invalidateQueries({ queryKey: ['item', itemId] })
+  }
+
+  const handleImmichAttach = async () => {
+    for (const assetId of immichSelected) {
+      await attachImmichImage(item.id, assetId)
+    }
+    setImmichSelected([])
+    setShowImmich(false)
     queryClient.invalidateQueries({ queryKey: ['item', itemId] })
   }
 
@@ -225,11 +237,32 @@ export default function ItemDetail() {
       <div className="bg-bg-card border border-border rounded-lg p-4 mb-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-medium">Photos</h3>
-          <label className="px-3 py-1 bg-accent text-white rounded text-xs cursor-pointer hover:bg-accent-hover">
-            Upload
-            <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-          </label>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowImmich(!showImmich)}
+              className="px-3 py-1 bg-bg-secondary border border-border text-text-primary rounded text-xs hover:bg-bg-tertiary"
+            >
+              {showImmich ? 'Close' : 'From Library'}
+            </button>
+            <label className="px-3 py-1 bg-accent text-white rounded text-xs cursor-pointer hover:bg-accent-hover">
+              Upload
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+            </label>
+          </div>
         </div>
+        {showImmich && (
+          <div className="mb-3">
+            <ImmichBrowser selectedIds={immichSelected} onSelectionChange={setImmichSelected} />
+            {immichSelected.length > 0 && (
+              <button
+                onClick={handleImmichAttach}
+                className="mt-2 px-3 py-1 bg-accent text-white rounded text-xs hover:bg-accent-hover"
+              >
+                Attach {immichSelected.length} photo{immichSelected.length > 1 ? 's' : ''}
+              </button>
+            )}
+          </div>
+        )}
         {item.images.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {item.images.map((img) => (

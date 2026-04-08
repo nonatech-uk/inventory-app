@@ -1,9 +1,14 @@
 """Item CRUD, search, and filtering."""
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 
 from src.api.deps import CurrentUser, get_conn, get_current_user
 from src.api.models import ItemCreate, ItemDetail, ItemList, ItemSummary, ItemUpdate
+
+log = logging.getLogger(__name__)
 from src.api.routers.images import download_cover_image
 
 router = APIRouter()
@@ -309,6 +314,52 @@ def update_item(
         WHERE i.id = %s
     """, (item_id,))
     return _row_to_detail(cur.fetchone(), cur)
+
+
+class BulkUpdate(BaseModel):
+    item_ids: list[int]
+    location_id: int | None = None
+    category: str | None = None
+    status: str | None = None
+
+
+@router.patch("/items/bulk")
+def bulk_update_items(
+    body: BulkUpdate,
+    conn=Depends(get_conn),
+    _user: CurrentUser = Depends(get_current_user),
+):
+    """Bulk update location, category, or status for multiple items."""
+    if not body.item_ids:
+        raise HTTPException(400, "No items specified")
+
+    fields = []
+    values = []
+    if body.location_id is not None:
+        fields.append("location_id = %s")
+        values.append(body.location_id)
+    if body.category is not None:
+        fields.append("category = %s")
+        values.append(body.category)
+    if body.status is not None:
+        fields.append("status = %s")
+        values.append(body.status)
+
+    if not fields:
+        raise HTTPException(400, "No fields to update")
+
+    fields.append("updated_at = now()")
+    placeholders = ", ".join(["%s"] * len(body.item_ids))
+    values.extend(body.item_ids)
+
+    cur = conn.cursor()
+    cur.execute(
+        f"UPDATE item SET {', '.join(fields)} WHERE id IN ({placeholders})",
+        values,
+    )
+    conn.commit()
+    log.info("Bulk updated %d items: %s", cur.rowcount, {k: v for k, v in body.model_dump().items() if v is not None and k != 'item_ids'})
+    return {"updated": cur.rowcount}
 
 
 @router.delete("/items/{item_id}", status_code=204)

@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 
 from config.settings import settings
 from src.api.deps import close_pool, init_pool
-from src.api.routers import amazon, auth, categories, documents, export, images, ingest, items, location_types, locations, lookup, stats
+from src.api.routers import amazon, auth, categories, documents, export, images, immich, ingest, items, location_types, locations, lookup, stats
 from src.api.usage_tracker import init_usage_tracker, shutdown_usage_tracker, track_usage_middleware, usage_pageview_router
 
 STATIC_DIR = Path(_project_root) / "static"
@@ -56,6 +56,7 @@ app.include_router(images.router, prefix="/api/v1", tags=["images"])
 app.include_router(documents.router, prefix="/api/v1", tags=["documents"])
 app.include_router(amazon.router, prefix="/api/v1", tags=["amazon"])
 app.include_router(lookup.router, prefix="/api/v1", tags=["lookup"])
+app.include_router(immich.router, prefix="/api/v1", tags=["immich"])
 app.include_router(ingest.router, prefix="/api/v1", tags=["ingest"])
 app.include_router(stats.router, prefix="/api/v1", tags=["stats"])
 app.include_router(export.router, prefix="/api/v1", tags=["export"])
