@@ -21,12 +21,15 @@ export default function Items() {
   const queryClient = useQueryClient()
 
   const [selected, setSelected] = useState<Set<number>>(new Set())
+  const [selectMode, setSelectMode] = useState(false)
   const [bulkLocation, setBulkLocation] = useState<string>('')
   const [bulkCategory, setBulkCategory] = useState<string>('')
   const [bulkStatus, setBulkStatus] = useState<string>('')
 
   const fmt = (v: number | null, currency: string) =>
     v != null ? new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(v) : ''
+
+  const selectionCount = selected.size
 
   const toggleItem = (id: number) => {
     setSelected((prev) => {
@@ -37,13 +40,23 @@ export default function Items() {
     })
   }
 
-  const toggleAll = () => {
+  const selectAll = () => {
     if (!data) return
-    if (selected.size === data.items.length) {
-      setSelected(new Set())
-    } else {
-      setSelected(new Set(data.items.map((i) => i.id)))
-    }
+    setSelected(new Set(data.items.map((i) => i.id)))
+  }
+
+  const deselectAll = () => setSelected(new Set())
+
+  const enterSelectMode = () => {
+    setSelectMode(true)
+  }
+
+  const exitSelectMode = () => {
+    setSelectMode(false)
+    setSelected(new Set())
+    setBulkLocation('')
+    setBulkCategory('')
+    setBulkStatus('')
   }
 
   const handleBulkUpdate = async () => {
@@ -57,15 +70,12 @@ export default function Items() {
     if (!updates.location_id && !updates.category && !updates.status) return
 
     await bulkUpdateItems(updates)
-    setSelected(new Set())
-    setBulkLocation('')
-    setBulkCategory('')
-    setBulkStatus('')
+    exitSelectMode()
     queryClient.invalidateQueries({ queryKey: ['items'] })
   }
 
   return (
-    <div>
+    <div className={selectMode && selectionCount > 0 ? 'pb-16' : ''}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">Items</h2>
         <Link
@@ -77,7 +87,7 @@ export default function Items() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3 mb-4 flex-wrap">
+      <div className="flex gap-3 mb-4 flex-wrap items-center">
         <select
           value={locationId ?? ''}
           onChange={(e) => { setLocationId(e.target.value ? Number(e.target.value) : undefined); setOffset(0) }}
@@ -108,57 +118,12 @@ export default function Items() {
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
+        {!selectMode ? (
+          <button onClick={enterSelectMode} className="text-text-secondary hover:text-accent text-sm px-2 ml-auto">Select</button>
+        ) : (
+          <button onClick={exitSelectMode} className="text-accent hover:text-accent-hover text-sm px-2 ml-auto">Exit Select</button>
+        )}
       </div>
-
-      {/* Bulk action bar */}
-      {selected.size > 0 && (
-        <div className="flex items-center gap-3 mb-4 p-3 bg-accent/5 border border-accent/20 rounded-lg flex-wrap">
-          <span className="text-sm font-medium">{selected.size} selected</span>
-          <select
-            value={bulkLocation}
-            onChange={(e) => setBulkLocation(e.target.value)}
-            className="border border-border rounded px-2 py-1 text-sm bg-bg-primary"
-          >
-            <option value="">Set Location...</option>
-            {locations?.map((l) => (
-              <option key={l.id} value={l.id}>{l.name}</option>
-            ))}
-          </select>
-          <select
-            value={bulkCategory}
-            onChange={(e) => setBulkCategory(e.target.value)}
-            className="border border-border rounded px-2 py-1 text-sm bg-bg-primary"
-          >
-            <option value="">Set Category...</option>
-            {categories?.map((c) => (
-              <option key={c.id} value={c.name}>{c.name}</option>
-            ))}
-          </select>
-          <select
-            value={bulkStatus}
-            onChange={(e) => setBulkStatus(e.target.value)}
-            className="border border-border rounded px-2 py-1 text-sm bg-bg-primary"
-          >
-            <option value="">Set Status...</option>
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-          <button
-            onClick={handleBulkUpdate}
-            disabled={!bulkLocation && !bulkCategory && !bulkStatus}
-            className="px-3 py-1 bg-accent text-white rounded text-sm hover:bg-accent-hover disabled:opacity-40"
-          >
-            Apply
-          </button>
-          <button
-            onClick={() => setSelected(new Set())}
-            className="px-3 py-1 border border-border rounded text-sm text-text-secondary hover:text-text-primary"
-          >
-            Clear
-          </button>
-        </div>
-      )}
 
       {isLoading && <LoadingSpinner />}
 
@@ -172,14 +137,17 @@ export default function Items() {
             <table className="w-full text-sm">
               <thead className="border-b border-border bg-bg-primary">
                 <tr>
-                  <th className="px-3 py-2 w-8">
-                    <input
-                      type="checkbox"
-                      checked={data.items.length > 0 && selected.size === data.items.length}
-                      onChange={toggleAll}
-                      className="rounded"
-                    />
-                  </th>
+                  {selectMode && (
+                    <th className="px-3 py-2 w-8">
+                      <input
+                        type="checkbox"
+                        checked={data.items.length > 0 && selectionCount === data.items.length}
+                        ref={(el) => { if (el) el.indeterminate = selectionCount > 0 && selectionCount < data.items.length }}
+                        onChange={() => selectionCount === data.items.length ? deselectAll() : selectAll()}
+                        className="accent-accent"
+                      />
+                    </th>
+                  )}
                   <th className="text-left px-4 py-2 font-medium text-text-secondary">Name</th>
                   <th className="text-left px-4 py-2 font-medium text-text-secondary">Location</th>
                   <th className="text-left px-4 py-2 font-medium text-text-secondary">Category</th>
@@ -188,32 +156,44 @@ export default function Items() {
                 </tr>
               </thead>
               <tbody>
-                {data.items.map((item) => (
-                  <tr key={item.id} className={`border-b border-border last:border-0 hover:bg-bg-hover ${selected.has(item.id) ? 'bg-accent/5' : ''}`}>
-                    <td className="px-3 py-2">
-                      <input
-                        type="checkbox"
-                        checked={selected.has(item.id)}
-                        onChange={() => toggleItem(item.id)}
-                        className="rounded"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <Link to={`/items/${item.id}`} className="text-accent hover:underline font-medium">
-                        {item.name}
-                      </Link>
-                      {item.brand && (
-                        <span className="text-text-secondary ml-1">({item.brand})</span>
+                {data.items.map((item) => {
+                  const isChecked = selected.has(item.id)
+                  return (
+                    <tr
+                      key={item.id}
+                      onClick={() => { if (selectMode) toggleItem(item.id) }}
+                      className={`border-b border-border last:border-0 transition-colors ${
+                        isChecked ? 'bg-accent/15' : 'hover:bg-bg-hover'
+                      } ${selectMode ? 'cursor-pointer' : ''}`}
+                    >
+                      {selectMode && (
+                        <td className="px-3 py-2">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggleItem(item.id)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="accent-accent"
+                          />
+                        </td>
                       )}
-                    </td>
-                    <td className="px-4 py-2 text-text-secondary">{item.location_name || '—'}</td>
-                    <td className="px-4 py-2 text-text-secondary">{item.category || '—'}</td>
-                    <td className="px-4 py-2 text-right tabular-nums">{fmt(item.current_value, item.currency)}</td>
-                    <td className="px-4 py-2">
-                      <span className="capitalize text-text-secondary">{item.status}</span>
-                    </td>
-                  </tr>
-                ))}
+                      <td className="px-4 py-2">
+                        <Link to={`/items/${item.id}`} className="text-accent hover:underline font-medium" onClick={(e) => { if (selectMode) e.preventDefault() }}>
+                          {item.name}
+                        </Link>
+                        {item.brand && (
+                          <span className="text-text-secondary ml-1">({item.brand})</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-text-secondary">{item.location_name || '—'}</td>
+                      <td className="px-4 py-2 text-text-secondary">{item.category || '—'}</td>
+                      <td className="px-4 py-2 text-right tabular-nums">{fmt(item.current_value, item.currency)}</td>
+                      <td className="px-4 py-2">
+                        <span className="capitalize text-text-secondary">{item.status}</span>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -241,6 +221,58 @@ export default function Items() {
             </div>
           )}
         </>
+      )}
+
+      {/* Fixed bulk action toolbar */}
+      {selectMode && selectionCount > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-bg-secondary border-t border-border shadow-lg z-20">
+          <div className="flex items-center gap-3 px-4 py-2.5 flex-wrap">
+            <span className="text-sm font-medium text-accent">{selectionCount} selected</span>
+            <select
+              value={bulkLocation}
+              onChange={(e) => setBulkLocation(e.target.value)}
+              className="border border-border rounded px-2 py-1 text-sm bg-bg-primary"
+            >
+              <option value="">Set Location...</option>
+              {locations?.map((l) => (
+                <option key={l.id} value={l.id}>{l.name}</option>
+              ))}
+            </select>
+            <select
+              value={bulkCategory}
+              onChange={(e) => setBulkCategory(e.target.value)}
+              className="border border-border rounded px-2 py-1 text-sm bg-bg-primary"
+            >
+              <option value="">Set Category...</option>
+              {categories?.map((c) => (
+                <option key={c.id} value={c.name}>{c.name}</option>
+              ))}
+            </select>
+            <select
+              value={bulkStatus}
+              onChange={(e) => setBulkStatus(e.target.value)}
+              className="border border-border rounded px-2 py-1 text-sm bg-bg-primary"
+            >
+              <option value="">Set Status...</option>
+              {STATUSES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <button
+              onClick={handleBulkUpdate}
+              disabled={!bulkLocation && !bulkCategory && !bulkStatus}
+              className="px-3 py-1 bg-accent text-white rounded text-sm hover:bg-accent-hover disabled:opacity-40"
+            >
+              Apply
+            </button>
+            <button
+              onClick={exitSelectMode}
+              className="px-3 py-1 border border-border rounded text-sm text-text-secondary hover:text-text-primary ml-auto"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

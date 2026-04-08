@@ -115,6 +115,20 @@ def _row_to_detail(row, cur) -> ItemDetail:
         for r in cur.fetchall()
     ]
 
+    # Fetch ebay links
+    cur.execute("""
+        SELECT id, item_id, ebay_order_id, ebay_item_id, ebay_title,
+               ebay_price, ebay_date, direction, linked_at
+        FROM item_ebay_link WHERE item_id = %s ORDER BY id
+    """, (item_id,))
+    ebay_links = [
+        {"id": r[0], "item_id": r[1], "ebay_order_id": r[2], "ebay_item_id": r[3],
+         "ebay_title": r[4], "ebay_price": float(r[5]) if r[5] else None,
+         "ebay_date": str(r[6]) if r[6] else None, "direction": r[7],
+         "linked_at": str(r[8])}
+        for r in cur.fetchall()
+    ]
+
     return ItemDetail(
         id=row[0], name=row[1], description=row[2],
         location_id=row[3], location_name=row[4],
@@ -135,6 +149,7 @@ def _row_to_detail(row, cur) -> ItemDetail:
         images=images,
         documents=documents,
         amazon_links=amazon_links,
+        ebay_links=ebay_links,
     )
 
 

@@ -3,6 +3,7 @@ import type {
   ItemCategory, ItemCategoryCreate,
   ItemCreate, ItemDetail, ItemList, ItemUpdate,
   AmazonLinkItem, AmazonOrder, DocumentItem,
+  EbayLinkItem, EbayOrder,
   LookupResult, ImageItem,
 } from './types.ts'
 
@@ -149,6 +150,29 @@ export function linkAmazon(
 
 export function unlinkAmazon(linkId: number): Promise<void> {
   return apiFetch(`/amazon-links/${linkId}`, { method: 'DELETE' })
+}
+
+// --- eBay ---
+
+export function searchEbay(params: { q?: string; direction?: string }): Promise<EbayOrder[]> {
+  const qs = new URLSearchParams()
+  if (params.q) qs.set('q', params.q)
+  if (params.direction) qs.set('direction', params.direction)
+  return apiFetch(`/ebay/search?${qs}`)
+}
+
+export function linkEbay(
+  itemId: number,
+  data: { ebay_order_id: string; ebay_item_id?: string; ebay_title?: string; ebay_price?: number; ebay_date?: string; direction?: string },
+): Promise<EbayLinkItem> {
+  return apiFetch(`/items/${itemId}/ebay`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export function unlinkEbay(linkId: number): Promise<void> {
+  return apiFetch(`/ebay-links/${linkId}`, { method: 'DELETE' })
 }
 
 // --- Lookup ---

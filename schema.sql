@@ -136,3 +136,40 @@ CREATE TABLE IF NOT EXISTS item_amazon_link (
 CREATE INDEX IF NOT EXISTS idx_item_amazon_item ON item_amazon_link(item_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_item_amazon_unique
     ON item_amazon_link (item_id, amazon_order_id, COALESCE(amazon_asin, ''));
+
+CREATE TABLE IF NOT EXISTS ebay_order (
+    id SERIAL PRIMARY KEY,
+    ebay_order_id TEXT UNIQUE NOT NULL,
+    direction TEXT NOT NULL DEFAULT 'buy',
+    ebay_item_id TEXT,
+    title TEXT NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    price NUMERIC(10,2),
+    currency TEXT NOT NULL DEFAULT 'GBP',
+    counterparty TEXT,
+    order_date TIMESTAMPTZ,
+    status TEXT,
+    image_url TEXT,
+    ebay_url TEXT,
+    raw_json JSONB,
+    synced_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_ebay_order_direction ON ebay_order(direction);
+CREATE INDEX IF NOT EXISTS idx_ebay_order_date ON ebay_order(order_date DESC);
+CREATE INDEX IF NOT EXISTS idx_ebay_order_title ON ebay_order USING GIN(to_tsvector('english', title));
+
+CREATE TABLE IF NOT EXISTS item_ebay_link (
+    id SERIAL PRIMARY KEY,
+    item_id INTEGER NOT NULL REFERENCES item(id) ON DELETE CASCADE,
+    ebay_order_id TEXT NOT NULL,
+    ebay_item_id TEXT,
+    ebay_title TEXT,
+    ebay_price NUMERIC(10,2),
+    ebay_date DATE,
+    direction TEXT NOT NULL DEFAULT 'buy',
+    linked_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_item_ebay_item ON item_ebay_link(item_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_item_ebay_unique
+    ON item_ebay_link (item_id, ebay_order_id, COALESCE(ebay_item_id, ''));

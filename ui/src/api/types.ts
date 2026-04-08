@@ -113,6 +113,7 @@ export interface ItemDetail {
   images: ImageItem[]
   documents: DocumentItem[]
   amazon_links: AmazonLinkItem[]
+  ebay_links: EbayLinkItem[]
 }
 
 export interface ItemCreate {
@@ -194,6 +195,33 @@ export interface AmazonOrder {
   unit_price: number | null
   currency: string
   category: string | null
+}
+
+export interface EbayOrder {
+  ebay_order_id: string
+  direction: string
+  ebay_item_id: string | null
+  title: string
+  quantity: number
+  price: number | null
+  currency: string
+  counterparty: string | null
+  order_date: string | null
+  status: string | null
+  image_url: string | null
+  ebay_url: string | null
+}
+
+export interface EbayLinkItem {
+  id: number
+  item_id: number
+  ebay_order_id: string
+  ebay_item_id: string | null
+  ebay_title: string | null
+  ebay_price: number | null
+  ebay_date: string | null
+  direction: string
+  linked_at: string
 }
 
 export interface LookupResult {

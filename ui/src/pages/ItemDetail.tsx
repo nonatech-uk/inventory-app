@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useItem, useUpdateItem, useDeleteItem, useCategories } from '../hooks/useItems.ts'
 import { useLocations } from '../hooks/useLocations.ts'
 import { useLocationPath } from '../hooks/useLocations.ts'
-import { uploadImage, deleteImage, attachImmichImage, unlinkDocument, unlinkAmazon } from '../api/items.ts'
+import { uploadImage, deleteImage, attachImmichImage, unlinkDocument, unlinkAmazon, unlinkEbay } from '../api/items.ts'
 import ImmichBrowser from '../components/ImmichBrowser.tsx'
 import { useQueryClient } from '@tanstack/react-query'
 import LoadingSpinner from '../components/common/LoadingSpinner.tsx'
@@ -96,6 +96,11 @@ export default function ItemDetail() {
 
   const handleAmazonUnlink = async (linkId: number) => {
     await unlinkAmazon(linkId)
+    queryClient.invalidateQueries({ queryKey: ['item', itemId] })
+  }
+
+  const handleEbayUnlink = async (linkId: number) => {
+    await unlinkEbay(linkId)
     queryClient.invalidateQueries({ queryKey: ['item', itemId] })
   }
 
@@ -327,6 +332,34 @@ export default function ItemDetail() {
                   )}
                 </div>
                 <button onClick={() => handleAmazonUnlink(link.id)} className="text-xs text-danger hover:underline">Unlink</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* eBay Links */}
+      {item.ebay_links.length > 0 && (
+        <div className="bg-bg-card border border-border rounded-lg p-4 mb-4">
+          <h3 className="text-sm font-medium mb-3">eBay Orders</h3>
+          <div className="space-y-2">
+            {item.ebay_links.map((link) => (
+              <div key={link.id} className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${link.direction === 'sell' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'}`}>
+                    {link.direction === 'sell' ? 'Sold' : 'Bought'}
+                  </span>
+                  <span>{link.ebay_title || link.ebay_order_id}</span>
+                  {link.ebay_price != null && (
+                    <span className="text-text-secondary">
+                      {new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(link.ebay_price)}
+                    </span>
+                  )}
+                  {link.ebay_date && (
+                    <span className="text-xs text-text-secondary">{link.ebay_date}</span>
+                  )}
+                </div>
+                <button onClick={() => handleEbayUnlink(link.id)} className="text-xs text-danger hover:underline">Unlink</button>
               </div>
             ))}
           </div>

@@ -26,6 +26,14 @@ class Settings(BaseSettings):
     paperless_api_token: str = ""
     tmdb_api_key: str = ""
 
+    # eBay API
+    ebay_client_id: str = ""
+    ebay_client_secret: str = ""
+    ebay_refresh_token: str = ""
+    ebay_ru_name: str = ""
+    ebay_site_id: str = "3"  # UK
+    ebay_verification_token: str = ""
+
     # Storage
     image_storage_path: str = "/app/data/images"
 

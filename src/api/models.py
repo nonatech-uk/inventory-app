@@ -102,6 +102,7 @@ class ItemDetail(BaseModel):
     images: list["ImageItem"] = []
     documents: list["DocumentItem"] = []
     amazon_links: list["AmazonLinkItem"] = []
+    ebay_links: list["EbayLinkItem"] = []
 
 
 class ItemCreate(BaseModel):
@@ -222,6 +223,44 @@ class AmazonLinkCreate(BaseModel):
     amazon_description: str | None = None
     amazon_price: float | None = None
     amazon_date: str | None = None
+
+
+# --- eBay ---
+
+class EbayOrder(BaseModel):
+    ebay_order_id: str
+    direction: str
+    ebay_item_id: str | None
+    title: str
+    quantity: int
+    price: float | None
+    currency: str
+    counterparty: str | None
+    order_date: str | None
+    status: str | None
+    image_url: str | None
+    ebay_url: str | None
+
+
+class EbayLinkItem(BaseModel):
+    id: int
+    item_id: int
+    ebay_order_id: str
+    ebay_item_id: str | None
+    ebay_title: str | None
+    ebay_price: float | None
+    ebay_date: str | None
+    direction: str
+    linked_at: str
+
+
+class EbayLinkCreate(BaseModel):
+    ebay_order_id: str
+    ebay_item_id: str | None = None
+    ebay_title: str | None = None
+    ebay_price: float | None = None
+    ebay_date: str | None = None
+    direction: str = "buy"
 
 
 # --- Stats ---
