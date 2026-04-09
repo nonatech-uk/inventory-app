@@ -195,7 +195,7 @@ export default function ItemDetail() {
               </div>
             </div>
             <div><label className={labelClass}>Description</label><textarea value={editForm.description || ''} onChange={(e) => set({ description: e.target.value || null })} className={inputClass} rows={2} /></div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div><label className={labelClass}>Location</label>
                 <select value={editForm.location_id ?? ''} onChange={(e) => set({ location_id: e.target.value ? Number(e.target.value) : null })} className={inputClass}>
                   <option value="">Select...</option>
@@ -209,12 +209,12 @@ export default function ItemDetail() {
               </div>
               <div><label className={labelClass}>Quantity</label><input type="number" min={1} value={editForm.quantity ?? 1} onChange={(e) => set({ quantity: Number(e.target.value) })} className={inputClass} /></div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div><label className={labelClass}>Brand</label><input value={editForm.brand || ''} onChange={(e) => set({ brand: e.target.value || null })} className={inputClass} /></div>
               <div><label className={labelClass}>Model</label><input value={editForm.model || ''} onChange={(e) => set({ model: e.target.value || null })} className={inputClass} /></div>
               <div><label className={labelClass}>Serial</label><input value={editForm.serial_number || ''} onChange={(e) => set({ serial_number: e.target.value || null })} className={inputClass} /></div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div><label className={labelClass}>Purchase Date</label><input type="date" value={editForm.purchase_date || ''} onChange={(e) => set({ purchase_date: e.target.value || null })} className={inputClass} /></div>
               <div><label className={labelClass}>Purchase Price</label><input type="number" step="0.01" value={editForm.purchase_price ?? ''} onChange={(e) => set({ purchase_price: e.target.value ? Number(e.target.value) : null })} className={inputClass} /></div>
               <div><label className={labelClass}>Current Value</label><input type="number" step="0.01" value={editForm.current_value ?? ''} onChange={(e) => set({ current_value: e.target.value ? Number(e.target.value) : null })} className={inputClass} /></div>
@@ -222,7 +222,7 @@ export default function ItemDetail() {
             {/* Media section in edit mode */}
             <div className="border-t border-border pt-3">
               <h3 className="text-sm font-medium mb-2">Media</h3>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div><label className={labelClass}>Type</label>
                   <select value={editForm.media_type || ''} onChange={(e) => set({ media_type: e.target.value || null })} className={inputClass}>
                     <option value="">None</option>

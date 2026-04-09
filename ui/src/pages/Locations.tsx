@@ -188,7 +188,7 @@ export default function Locations() {
       {/* Add Location */}
       {showForm && (
         <div className="bg-bg-card border border-border rounded-lg p-4 mb-4 space-y-3">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
               placeholder="Name"
               value={form.name}

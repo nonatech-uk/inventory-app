@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { useMe } from '../../hooks/useAuth.ts'
 import AppSwitcher from './AppSwitcher.tsx'
 
@@ -13,20 +13,26 @@ const NAV_ITEMS = [
   { to: '/ebay', label: 'eBay', icon: '⊞' },
 ]
 
-export default function Sidebar() {
+interface SidebarProps {
+  className?: string
+  onNavigate?: () => void
+}
+
+export default function Sidebar({ className, onNavigate }: SidebarProps) {
   const { data: user } = useMe()
 
   return (
-    <aside className="w-52 bg-bg-secondary border-r border-border flex flex-col shrink-0">
+    <aside className={`w-52 bg-bg-secondary border-r border-border flex flex-col shrink-0 ${className ?? ''}`}>
       <div className="p-4 border-b border-border flex items-center justify-between">
-        <h1 className="text-lg font-bold text-accent">Stuff</h1>
-        <AppSwitcher />
+        <Link to="/" className="text-lg font-bold text-accent hover:text-accent-hover transition-colors">Stuff</Link>
+        <AppSwitcher currentApp="Stuff" />
       </div>
-      <nav className="flex-1 p-2 space-y-1">
+      <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
         {NAV_ITEMS.map(({ to, label, icon }) => (
           <NavLink
             key={to}
             to={to}
+            onClick={onNavigate}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
                 isActive

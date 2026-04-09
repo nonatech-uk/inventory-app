@@ -117,7 +117,7 @@ export default function Amazon() {
             {data.total} order item{data.total !== 1 ? 's' : ''}
           </div>
 
-          <div className="bg-bg-card border border-border rounded-lg overflow-hidden">
+          <div className="bg-bg-card border border-border rounded-lg overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b border-border bg-bg-primary">
                 <tr>

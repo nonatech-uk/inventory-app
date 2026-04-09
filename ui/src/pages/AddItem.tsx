@@ -160,7 +160,7 @@ export default function AddItem() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className={labelClass}>Brand</label>
             <input value={form.brand || ''} onChange={(e) => set({ brand: e.target.value || null })} className={inputClass} />
@@ -175,7 +175,7 @@ export default function AddItem() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className={labelClass}>Purchase Date</label>
             <input type="date" value={form.purchase_date || ''} onChange={(e) => set({ purchase_date: e.target.value || null })} className={inputClass} />
@@ -193,7 +193,7 @@ export default function AddItem() {
         {/* Media Fields */}
         <div className="border-t border-border pt-4">
           <h3 className="text-sm font-medium mb-3">Media (optional)</h3>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className={labelClass}>Media Type</label>
               <select value={form.media_type || ''} onChange={(e) => set({ media_type: e.target.value || null })} className={inputClass}>
@@ -216,7 +216,7 @@ export default function AddItem() {
           {form.media_type && (
             <>
               {/* Row 2: type-sensitive fields */}
-              <div className="grid grid-cols-3 gap-4 mt-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3">
                 {form.media_type === 'book' && (
                   <div>
                     <label className={labelClass}>Subtitle</label>
@@ -236,7 +236,7 @@ export default function AddItem() {
               </div>
 
               {/* Row 3: publisher/label/studio + date */}
-              <div className="grid grid-cols-3 gap-4 mt-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3">
                 <div>
                   <label className={labelClass}>
                     {form.media_type === 'cd' || form.media_type === 'vinyl' ? 'Label' : form.media_type === 'dvd' || form.media_type === 'bluray' ? 'Studio' : 'Publisher'}
@@ -257,7 +257,7 @@ export default function AddItem() {
 
               {/* Row 4: book-specific extras */}
               {form.media_type === 'book' && (
-                <div className="grid grid-cols-3 gap-4 mt-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3">
                   <div>
                     <label className={labelClass}>Format</label>
                     <input value={form.media_format || ''} onChange={(e) => set({ media_format: e.target.value || null })} className={inputClass} placeholder="Paperback / Hardcover" />
