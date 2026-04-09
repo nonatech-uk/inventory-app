@@ -1,8 +1,5 @@
-psycopg2-binary
-pydantic-settings
-fastapi
+mees-shared @ file:///tmp/mees-shared-py
 python-multipart
 uvicorn[standard]
-httpx
 Pillow
 pyzbar

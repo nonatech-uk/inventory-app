@@ -4,3 +4,7 @@ __pycache__/
 *.pyc
 config/.env
 .env
+
+# Shared libraries copied during build
+mees-shared-py/
+mees-shared-ui/
